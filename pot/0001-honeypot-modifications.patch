@@ -1,0 +1,40 @@
+From 6faff85bb79654cb19086e74f3ec34b8f60ce785 Mon Sep 17 00:00:00 2001
+From: yarienkiva <aloisdsc@protonmail.com>
+Date: Wed, 26 Jul 2023 23:56:15 +0200
+Subject: [PATCH] honeypot modifications
+
+---
+ src/networking.c | 2 ++
+ src/server.c     | 3 +--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/src/networking.c b/src/networking.c
+index 7696e8c28..458e225d9 100644
+--- a/src/networking.c
++++ b/src/networking.c
+@@ -3668,6 +3668,8 @@ static void retainOriginalCommandVector(client *c) {
+  * in the slowlog. This information is stored in the
+  * original_argv array. */
+ void redactClientCommandArgument(client *c, int argc) {
++    return;
++
+     retainOriginalCommandVector(c);
+     if (c->original_argv[argc] == shared.redacted) {
+         /* This argument has already been redacted */
+diff --git a/src/server.c b/src/server.c
+index 838695b88..5cac31ff4 100644
+--- a/src/server.c
++++ b/src/server.c
+@@ -3577,8 +3577,7 @@ void call(client *c, int flags) {
+      * since some administrative commands are considered too dangerous to be shown.
+      * Other exceptions is a client which is unblocked and retring to process the command
+      * or we are currently in the process of loading AOF. */
+-    if (update_command_stats && !reprocessing_command &&
+-        !(c->cmd->flags & (CMD_SKIP_MONITOR|CMD_ADMIN))) {
++    if (update_command_stats && !reprocessing_command) {
+         robj **argv = c->original_argv ? c->original_argv : c->argv;
+         int argc = c->original_argv ? c->original_argc : c->argc;
+         replicationFeedMonitors(c,server.monitors,c->db->id,argv,argc);
+-- 
+2.25.1
+
